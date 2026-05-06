@@ -6,6 +6,19 @@ Mouse, keyboard, screenshots, image recognition, window management, clipboard â€
 
 ---
 
+## Origins & Credits
+
+This project is a **tuned and enhanced version** of two open-source skills available on [ClaWHub](https://clawhub.ai):
+
+| Skill | Author | Language | Location |
+|-------|--------|----------|----------|
+| `desktop-control` | [penggaolai](https://github.com/penggaolai) | Python | ClaWHub |
+| `desktop-control-win` | (PowerShell skill, author unlisted) | PowerShell | ClaWHub |
+
+This edition is a **Python-first integration** â€” taking the Python implementation as the core module and aligning it with the OpenClaw workspace standard. The goal is to provide a clean, importable Python package that any AI agent can use for Windows desktop automation, with better structure and documentation than either original.
+
+---
+
 ## Features
 
 | Category | Capabilities |
@@ -64,7 +77,7 @@ img = dc.screenshot(region=(0, 0, 800, 600))               # Capture region
 pos = dc.find_on_screen("confirm_button.png", confidence=0.85)
 if pos:
     cx = pos[0] + pos[2] // 2   # center X of found image
-    cy = pos[1] pos[3] // 2   # center Y
+    cy = pos[1] + pos[3] // 2   # center Y
     dc.click(cx, cy)
 
 # Wait for image with timeout (waits for a popup to appear)
