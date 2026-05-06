@@ -1,150 +1,152 @@
 ---
-name: desktop-control
+name: desktop-control-tuned
 description: >
-  Automate Windows desktop — mouse, keyboard, screenshots, image recognition,
-  window management, clipboard. Use when you need to control the desktop programmatically,
-  click buttons, fill forms, open files, capture screens, or wait for popups.
+  Automate Windows desktop programmatically — mouse, keyboard, screenshots, image matching,
+  window management, clipboard. Use when you need to control the desktop: click buttons,
+  fill forms, open files, capture screens, wait for popups. Written in Python.
 ---
 
-# Desktop Control
+# Desktop Control (Tuned)
 
-接管 Windows 桌面。鼠标、键盘、屏幕截图、图像匹配、窗口管理、剪贴板全能。
+Python-based Windows desktop automation for AI agents.
 
-## 安装依赖
+## Installation
 
 ```powershell
 python -m pip install pyautogui pillow opencv-python pygetwindow pyperclip
 ```
 
-## 导入
+## Import
 
 ```python
 from desktop_control import DesktopController
-dc = DesktopController()  # 默认启用 FAILSAFE（鼠标到四角立即停止）
+dc = DesktopController()  # FAILSAFE enabled by default
+```
+
+> Module location: `C:\Users\Administrator\.openclaw\workspace\desktop_control\`
+
+---
+
+## Mouse
+
+```python
+dc.move_mouse(500, 300, duration=0.5)   # Smooth move to (500,300)
+dc.click(500, 300)                      # Left click
+dc.double_click(500, 300)               # Double click
+dc.right_click(500, 300)               # Right click
+dc.drag(100, 100, 500, 500)            # Drag from (100,100) to (500,500)
+dc.scroll(3)                            # Scroll up 3 clicks
+dc.get_mouse_position()                 # Returns (x, y)
 ```
 
 ---
 
-## 鼠标
+## Keyboard
 
 ```python
-dc.move_mouse(500, 300, duration=0.5)   # 移动到 (500,300)，0.5秒平滑
-dc.click(500, 300)                      # 左键单击
-dc.double_click(500, 300)               # 双击
-dc.right_click(500, 300)                # 右键
-dc.drag(100, 100, 500, 500)             # 拖拽
-dc.scroll(3)                            # 向上滚3格
-dc.get_mouse_position()                 # 返回 (x, y)
-```
-
----
-
-## 键盘
-
-```python
-dc.type_text("Hello World", interval=0)  # 瞬间输入
-dc.press("enter")                       # 按回车
-dc.press("tab")
+dc.type_text("Hello World", interval=0)  # Instant text
+dc.press("enter")                       # Press Enter
 dc.hotkey("ctrl", "s")                  # Ctrl+S
 dc.hotkey("alt", "f4")                  # Alt+F4
-dc.hotkey("ctrl", "a")                  # Ctrl+A 全选
-dc.hotkey("ctrl", "v")                  # Ctrl+V 粘贴
+dc.hotkey("ctrl", "a")                  # Ctrl+A
+dc.hotkey("ctrl", "v")                  # Ctrl+V
 ```
 
 ---
 
-## 屏幕
+## Screen
 
 ```python
-# 截图
-img = dc.screenshot()                                     # 返回 PIL Image
-dc.screenshot(filename="screen.png")                      # 保存文件
-img = dc.screenshot(region=(0, 0, 800, 600))              # 截取区域
+# Screenshot
+img = dc.screenshot()                                     # Returns PIL Image
+dc.screenshot(filename="C:/temp/screen.png")                # Save to file
+img = dc.screenshot(region=(0, 0, 800, 600))              # Capture region (left, top, width, height)
 
-# 像素颜色
+# Pixel color
 r, g, b = dc.get_pixel_color(960, 540)
 
-# 找图匹配 — 等待弹窗、等待按钮出现
-pos = dc.find_on_screen("button.png", confidence=0.85)
+# Image matching — the core AI-friendly feature
+pos = dc.find_on_screen("C:/temp/button.png", confidence=0.85)
 if pos:
-    cx = pos[0] + pos[2] // 2  # 中心X
-    cy = pos[1] + pos[3] // 2  # 中心Y
+    cx = pos[0] + pos[2] // 2   # center X
+    cy = pos[1] + pos[3] // 2   # center Y
     dc.click(cx, cy)
 
-# 等待图片出现（带超时）
-result = dc.wait_for_image("confirm.png", timeout=10, interval=0.5)
+# Wait for image to appear (waits for popup, loading screen, etc.)
+result = dc.wait_for_image("C:/temp/confirm.png", timeout=10, interval=0.5)
 if result:
-    print("弹窗出现了！")
+    print("Image appeared!")
+else:
+    print("Timeout — image never appeared")
 ```
 
 ---
 
-## 窗口
+## Window
 
 ```python
-dc.get_all_windows()       # 所有窗口标题列表
-dc.get_active_window()    # 当前活动窗口
-dc.activate_window("Notepad")   # 激活窗口（部分匹配）
-dc.close_window("Notepad")     # 关闭窗口
+dc.get_all_windows()       # List all window titles
+dc.get_active_window()    # Current active window
+dc.activate_window("Notepad")   # Activate window (partial match)
+dc.close_window("Notepad")     # Close window
 ```
 
 ---
 
-## 剪贴板
+## Clipboard
 
 ```python
-dc.copy_to_clipboard("要复制的内容")
+dc.copy_to_clipboard("Text to copy")
 text = dc.get_from_clipboard()
 ```
 
 ---
 
-## 常用组合
+## Common Patterns
 
 ```python
-# 打开文件并输入文字（用 Win+R 方式）
-import subprocess, time
-filepath = "test.txt"
-
-subprocess.Popen(["notepad.exe", filepath])
-time.sleep(1)
-dc.type_text("你好！")
+# Open a file using Win+R
+dc.hotkey("win", "r")
+dc.type_text("notepad.exe", interval=0)
+dc.press("enter")
+# OR
+import subprocess
+subprocess.Popen(["notepad.exe", "test.txt"])
 ```
 
 ```python
-# 等待弹窗出现再点击按钮
-pos = dc.wait_for_image("ok_button.png", timeout=15)
+# Wait for popup then click "OK"
+pos = dc.wait_for_image("C:/temp/ok_button.png", timeout=20)
 if pos:
     dc.click(pos[0] + pos[2]//2, pos[1] + pos[3]//2)
+    print("Clicked!")
 ```
 
 ```python
-# 截图分析 + 像素验证 UI 状态
-import os
-os.makedirs("screenshots", exist_ok=True)
-dc.screenshot(filename="screenshots/current.png")
+# Screenshot + pixel check (verify UI state)
+dc.screenshot(filename="C:/temp/screen.png")
 r, g, b = dc.get_pixel_color(960, 540)
 if (r, g, b) == (30, 90, 170):
-    print("按钮是蓝色，状态正确")
+    print("Button is blue — state is correct")
 ```
 
 ---
 
-## 安全机制
+## Safety
 
-- **FAILSAFE**：鼠标移动到屏幕任意一角（4个角），立即停止所有操作
-- `dc.is_safe()` 检查当前是否处于安全状态
-- 操作前确保目标窗口已激活（用 `activate_window` 或先点击窗口内）
+- **FAILSAFE**: Move mouse to any screen corner → all operations stop immediately
+- `dc.is_safe()` — check if safe to continue
+- Always `activate_window()` or click inside the target window before performing actions
 
 ---
 
-## 完整方法列表
+## Complete Method Reference
 
-| 类别 | 方法 |
-|------|------|
-| 鼠标 | `move_mouse`, `move_relative`, `click`, `double_click`, `right_click`, `drag`, `scroll`, `get_mouse_position` |
-| 键盘 | `type_text`, `press`, `hotkey`, `key_down`, `key_up` |
-| 屏幕 | `screenshot`, `get_pixel_color`, `find_on_screen`, `wait_for_image`, `get_screen_size` |
-| 窗口 | `get_all_windows`, `activate_window`, `get_active_window`, `close_window` |
-| 剪贴板 | `copy_to_clipboard`, `get_from_clipboard` |
-| 工具 | `pause(seconds)`, `is_safe()` |
+| Category | Methods |
+|----------|---------|
+| Mouse | `move_mouse`, `move_relative`, `click`, `double_click`, `right_click`, `drag`, `scroll`, `get_mouse_position` |
+| Keyboard | `type_text`, `press`, `hotkey`, `key_down`, `key_up` |
+| Screen | `screenshot`, `get_pixel_color`, `find_on_screen`, `wait_for_image`, `get_screen_size` |
+| Window | `get_all_windows`, `activate_window`, `get_active_window`, `close_window` |
+| Clipboard | `copy_to_clipboard`, `get_from_clipboard` |
+| Utility | `pause(seconds)`, `is_safe()` |
